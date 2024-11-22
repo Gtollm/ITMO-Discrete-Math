@@ -10,6 +10,33 @@ inline double Tap(double a, double b) { return a * b; }
 inline double Tmin(double a, double b) { return std::min(a, b); }
 
 template <typename T>
+typename FuzzySet<T>::FuzMap CRelation(const FuzzySet<T> &left,
+                                       const FuzzySet<T> &right) {
+  FuzzySet<T> A_complement = left.Complementation();
+
+  typename FuzzySet<T>::FuzMap A_B_relation;
+  for (const auto &[a_key, a_value] : left.GetFuzzySet()) {
+    for (const auto &[b_key, b_value] : right.GetFuzzySet()) {
+      A_B_relation.insert({{a_key, b_key}, std::min(a_value, b_value)});
+    }
+  }
+
+  typename FuzzySet<T>::FuzMap A_complement_B_relation;
+  for (const auto &[a_key, a_value] : A_complement.GetFuzzySet()) {
+    for (const auto &[b_key, b_value] : right.GetFuzzySet()) {
+      A_complement_B_relation.insert(
+          {{a_key, b_key}, std::min(a_value, 1.0)});
+    }
+  }
+
+  typename FuzzySet<T>::FuzMap R_relation;
+  for (auto &[key, value] : A_B_relation) {
+    R_relation[key] = std::max(value, A_complement_B_relation[key]);
+  }
+  return R_relation;
+}
+
+template <typename T>
 FuzzySet<T>::FuzzySet() = default;
 
 template <typename T>
@@ -214,28 +241,7 @@ FuzzySet<T> FuzzySet<T>::Implication(const FuzzySet<T> &other,
 template <typename T>
 FuzzySet<T> FuzzySet<T>::GeneralizedModusPonens(
     const FuzzySet<T> &right, const FuzzySet<T> &left_prime) const {
-  FuzzySet<T> A_complement = this->Complementation();
-
-  FuzMap A_B_relation;
-  for (const auto &[a_key, a_value] : this->data_) {
-    for (const auto &[b_key, b_value] : right.data_) {
-      A_B_relation.insert({{a_key, b_key}, std::min(a_value, b_value)});
-    }
-  }
-
-  FuzMap A_complement_B_relation;
-  for (const auto &[a_key, a_value] : A_complement.data_) {
-    for (const auto &[b_key, b_value] : right.data_) {
-      A_complement_B_relation.insert(
-          {{a_key, b_key}, std::min(a_value, 1.0)});
-    }
-  }
-
-  FuzMap R_relation;
-  for (auto &[key, value] : A_B_relation) {
-    R_relation[key] = std::max(value, A_complement_B_relation[key]);
-  }
-
+  FuzMap R_relation = CRelation(*this, right);
   FuzzySet result;
 
   for (const auto &[b_key, _] : right.data_) {
@@ -255,27 +261,7 @@ FuzzySet<T> FuzzySet<T>::GeneralizedModusPonens(
 template <typename T>
 FuzzySet<T> FuzzySet<T>::GeneralizedModusTollens(
     const FuzzySet &right, const FuzzySet &right_prime) const {
-  FuzzySet A_complement = this->Complementation();
-
-  FuzMap A_B_relation;
-  for (const auto &[a_key, a_value] : this->data_) {
-    for (const auto &[b_key, b_value] : right.data_) {
-      A_B_relation.insert({{a_key, b_key}, std::min(a_value, b_value)});
-    }
-  }
-
-  FuzMap A_complement_B_relation;
-  for (const auto &[a_key, a_value] : A_complement.data_) {
-    for (const auto &[b_key, b_value] : right.data_) {
-      A_complement_B_relation.insert(
-          {{a_key, b_key}, std::min(a_value, 1.0)});
-    }
-  }
-
-  FuzMap R_relation;
-  for (auto &[key, value] : A_B_relation) {
-    R_relation[key] = std::max(value, A_complement_B_relation[key]);
-  }
+  FuzMap R_relation = CRelation(*this, right);
 
   FuzzySet result;
 
@@ -297,7 +283,11 @@ FuzzySet<T> FuzzySet<T>::GeneralizedModusTollens(
 }
 
 template <typename T>
-const std::unordered_map<T, double> &FuzzySet<T>::GetFuzzySet() {
+std::unordered_map<T, double> &FuzzySet<T>::GetFuzzySet() {
+  return this->data_;
+}
+template <typename T>
+const std::unordered_map<T, double> &FuzzySet<T>::GetFuzzySet() const {
   return this->data_;
 }
 template <typename T>

@@ -77,14 +77,15 @@ class FuzzySet {
   FuzzySet GeneralizedModusTollens(const FuzzySet& right,
                                    const FuzzySet& right_prime) const;
 
-  const std::unordered_map<T, double>& GetFuzzySet() [[nodiscard]];
+  std::unordered_map<T, double>& GetFuzzySet();
+  const std::unordered_map<T, double>& GetFuzzySet() const;
 
   FuzzySet& operator+=(const FuzzySet& other);
   FuzzySet& operator*=(const FuzzySet& other);
   FuzzySet& operator-();
 
-  FuzzySet operator+(const FuzzySet& other) [[nodiscard]];
-  FuzzySet operator*(const FuzzySet& other) [[nodiscard]];
+  FuzzySet operator+(const FuzzySet& other);
+  FuzzySet operator*(const FuzzySet& other);
 
   template <bool Const>
   class Iterator {
