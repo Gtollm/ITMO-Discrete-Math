@@ -157,3 +157,63 @@ TEST(FuzzyRelationTestSuite, InequalityOperatorTest) {
 
   ASSERT_TRUE(relation1 != relation2);
 }
+
+TEST(FuzzyRelationTestSuite, ImplicationMinimumTest) {
+  FuzzySet<double> leftSet = CreateFuzzySet<double>({1.0, 2.0}, {0.5, 0.6});
+  FuzzySet<double> rightSet = CreateFuzzySet<double>({3.0, 4.0}, {0.7, 0.8});
+
+  FuzzyRelation<double> implicationRelation =
+      Implication(leftSet, rightSet, ImplicationType::MINIMUM);
+
+  auto relation = implicationRelation.GetRelation();
+  ASSERT_EQ(relation.size(), 4);
+  ASSERT_EQ(relation.at(std::make_pair(1.0, 3.0)), 0.5);
+  ASSERT_EQ(relation.at(std::make_pair(1.0, 4.0)), 0.5);
+  ASSERT_EQ(relation.at(std::make_pair(2.0, 3.0)), 0.6);
+  ASSERT_EQ(relation.at(std::make_pair(2.0, 4.0)), 0.6);
+}
+
+TEST(FuzzyRelationTestSuite, ImplicationAlgProductTest) {
+  FuzzySet<double> leftSet = CreateFuzzySet<double>({1.0, 2.0}, {0.5, 0.6});
+  FuzzySet<double> rightSet = CreateFuzzySet<double>({3.0, 4.0}, {0.7, 0.8});
+
+  FuzzyRelation<double> implicationRelation =
+      Implication(leftSet, rightSet, ImplicationType::ALGPRODUCT);
+
+  auto relation = implicationRelation.GetRelation();
+  ASSERT_EQ(relation.size(), 4);
+  ASSERT_EQ(relation.at(std::make_pair(1.0, 3.0)), 0.35);
+  ASSERT_EQ(relation.at(std::make_pair(1.0, 4.0)), 0.4);
+  ASSERT_EQ(relation.at(std::make_pair(2.0, 3.0)), 0.42);
+  ASSERT_EQ(relation.at(std::make_pair(2.0, 4.0)), 0.48);
+}
+
+TEST(FuzzyRelationTestSuite, ImplicationZadehMaxMinTest) {
+  FuzzySet<double> leftSet = CreateFuzzySet<double>({1.0, 2.0}, {0.5, 0.6});
+  FuzzySet<double> rightSet = CreateFuzzySet<double>({3.0, 4.0}, {0.7, 0.8});
+
+  FuzzyRelation<double> implicationRelation =
+      Implication(leftSet, rightSet, ImplicationType::ZADEHMAXMIN);
+
+  auto relation = implicationRelation.GetRelation();
+  ASSERT_EQ(relation.size(), 4);
+  ASSERT_EQ(relation.at(std::make_pair(1.0, 3.0)), 0.7);
+  ASSERT_EQ(relation.at(std::make_pair(1.0, 4.0)), 0.8);
+  ASSERT_EQ(relation.at(std::make_pair(2.0, 3.0)), 0.7);
+  ASSERT_EQ(relation.at(std::make_pair(2.0, 4.0)), 0.8);
+}
+
+TEST(FuzzyRelationTestSuite, ImplicationZadehArithmeticTest) {
+  FuzzySet<double> leftSet = CreateFuzzySet<double>({1.0, 2.0}, {0.5, 0.6});
+  FuzzySet<double> rightSet = CreateFuzzySet<double>({3.0, 4.0}, {0.7, 0.8});
+
+  FuzzyRelation<double> implicationRelation =
+      Implication(leftSet, rightSet, ImplicationType::ZADEHARITHMETIC);
+
+  auto relation = implicationRelation.GetRelation();
+  ASSERT_EQ(relation.size(), 4);
+  ASSERT_EQ(relation.at(std::make_pair(1.0, 3.0)), 0.5);
+  ASSERT_EQ(relation.at(std::make_pair(1.0, 4.0)), 0.5);
+  ASSERT_EQ(relation.at(std::make_pair(2.0, 3.0)), 0.6);
+  ASSERT_EQ(relation.at(std::make_pair(2.0, 4.0)), 0.6);
+}

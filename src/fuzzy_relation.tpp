@@ -72,6 +72,17 @@ FuzzyRelation<T>::FuzzyRelation(const FuzzySet<T>& left,
     }
   }
 }
+template <typename T>
+FuzzyRelation<T>::FuzzyRelation(
+    const FuzzySet<T>& left, const FuzzySet<T>& right,
+    std::function<double(double, double)> relation_rule) {
+  for (const auto& [left_key, left_value] : left) {
+    for (const auto& [right_key, right_value] : right) {
+      this->data_.insert(
+          {{left_key, right_key}, relation_rule(left_value, right_value)});
+    }
+  }
+}
 
 template <typename T>
 FuzzyRelation<T>& FuzzyRelation<T>::Unite(const FuzzyRelation& other) {
@@ -197,4 +208,28 @@ template <typename T>
 FuzzyRelation<T> Composition(const FuzzyRelation<T>& left,
                              const FuzzyRelation<T>& right) {
   return left.Composition(right);
+}
+
+template <typename T>
+FuzzyRelation<T> Implication(const FuzzySet<T>& left,
+                             const FuzzySet<T>& right,
+                             ImplicationType type) {
+  std::function<double(double, double)> rule;
+  switch (type) {
+    case ImplicationType::MINIMUM:
+      rule = [](double a, double b) { return std::min(a, b); };
+      break;
+    case ImplicationType::ALGPRODUCT:
+      rule = [](double a, double b) { return a * b; };
+      break;
+    case ImplicationType::ZADEHMAXMIN:
+      rule = [](double a, double b) { return std::max(1.0 - a, b); };
+      break;
+    case ImplicationType::ZADEHARITHMETIC:
+      rule = [](double a, double b) {
+        return std::max(1.0 - a, std::min(a, b));
+      };
+      break;
+  }
+  return FuzzyRelation<T>(left, right, rule);
 }

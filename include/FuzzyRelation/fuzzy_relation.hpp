@@ -15,6 +15,8 @@ class FuzzyRelation {
                                pair_equal>& data);
 
   FuzzyRelation(const FuzzySet<T>& left, const FuzzySet<T>& right);
+  FuzzyRelation(const FuzzySet<T>& left, const FuzzySet<T>& right,
+                std::function<double(double, double)> relation_rule);
 
   FuzzyRelation& Unite(const FuzzyRelation& other);
   FuzzyRelation& Intersect(const FuzzyRelation& other);
@@ -45,5 +47,7 @@ FuzzyRelation<T> Complementation(const FuzzyRelation<T>& object);
 template <typename T>
 FuzzyRelation<T> Composition(const FuzzyRelation<T>& left,
                              const FuzzyRelation<T>& right);
-
+template <typename T>
+FuzzyRelation<T> Implication(const FuzzySet<T>& left,
+                             const FuzzySet<T>& right, ImplicationType type);
 #include "fuzzy_relation.tpp"
